@@ -140,7 +140,7 @@ router.get('/search', protect, async (req, res) => {
     sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
     const applications = await Application.find(query)
-      .populate('job', 'title companyName field location type')
+      .populate('job', 'title companyName field location type salary')
       .populate('student', 'name email phone field graduationYear')
       .populate('recruiter', 'name email phone companyName')
       .sort(sort)
@@ -168,7 +168,7 @@ router.get('/search', protect, async (req, res) => {
 router.get('/:id([0-9a-fA-F]{24})', protect, async (req, res) => {
   try {
     const application = await Application.findById(req.params.id)
-      .populate('job', 'title companyName field location type description requirements')
+      .populate('job', 'title companyName field location type description requirements salary')
       .populate('student', 'name email phone field graduationYear profilePicture resume')
       .populate('recruiter', 'name email phone companyName companyDescription companyLogo');
 
