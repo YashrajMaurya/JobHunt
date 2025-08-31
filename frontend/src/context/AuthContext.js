@@ -77,20 +77,34 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        console.log('🔐 Checking authentication...');
+        console.log('🌐 API URL:', axios.defaults.baseURL);
+        console.log('🍪 Cookies enabled:', document.cookie ? 'Yes' : 'No');
+        
         const response = await axios.get('/api/auth/me');
+        console.log('✅ Auth check successful:', response.data);
+        
         if (response.data.success) {
           dispatch({ type: 'AUTH_SUCCESS', payload: response.data.user });
         } else {
-          // Silently mark auth as checked without surfacing an error on public routes
+          console.log('❌ No user data in response');
           dispatch({ type: 'AUTH_CHECKED' });
         }
       } catch (error) {
+        console.log('❌ Auth check failed:', {
+          status: error.response?.status,
+          message: error.response?.data?.message,
+          error: error.message
+        });
+        
         // No token or a 401 should not show a global error on public pages
         dispatch({ type: 'AUTH_CHECKED' });
       }
     };
 
-    checkAuth();
+    // Delay auth check to ensure axios is configured
+    const timer = setTimeout(checkAuth, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   // Login function

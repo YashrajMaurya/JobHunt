@@ -22,7 +22,10 @@ router.get('/', optionalAuth, async (req, res) => {
     } = req.query;
 
     // Build query
-    const query = { isActive: true };
+    const query = { 
+      isActive: true,
+      applicationDeadline: { $gt: new Date() } // Only show jobs with future deadlines
+    };
     
     if (field && field !== 'all') {
       query.field = field;
@@ -100,6 +103,11 @@ router.get('/:id', optionalAuth, async (req, res) => {
 
     if (!job.isActive) {
       return res.status(404).json({ message: 'Job is no longer active' });
+    }
+
+    // Check if application deadline has passed
+    if (new Date() > new Date(job.applicationDeadline)) {
+      return res.status(404).json({ message: 'Application deadline has passed for this job' });
     }
 
     // Increment view count

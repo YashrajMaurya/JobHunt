@@ -151,21 +151,48 @@ const JobList = () => {
     return diffDays;
   };
 
+  const isDeadlinePassed = (deadline) => {
+    return getDaysUntilDeadline(deadline) <= 0;
+  };
+
+  const getDeadlineText = (deadline) => {
+    const daysLeft = getDaysUntilDeadline(deadline);
+    if (daysLeft <= 0) {
+      return 'Application Closed';
+    } else if (daysLeft === 1) {
+      return '1 day left';
+    } else {
+      return `${daysLeft} days left`;
+    }
+  };
+
   const renderJobCard = (job) => (
     <Grid item xs={12} md={6} lg={4} key={job._id}>
       <Card
         sx={{
           height: '100%',
-          cursor: 'pointer',
+          cursor: isDeadlinePassed(job.applicationDeadline) ? 'not-allowed' : 'pointer',
+          opacity: isDeadlinePassed(job.applicationDeadline) ? 0.7 : 1,
           '&:hover': {
-            transform: 'translateY(-4px)',
+            transform: isDeadlinePassed(job.applicationDeadline) ? 'none' : 'translateY(-4px)',
             transition: 'transform 0.3s ease-in-out',
-            boxShadow: theme.shadows[8]
+            boxShadow: isDeadlinePassed(job.applicationDeadline) ? theme.shadows[1] : theme.shadows[8]
           }
         }}
-        onClick={() => navigate(`/jobs/${job._id}`)}
+        onClick={() => !isDeadlinePassed(job.applicationDeadline) && navigate(`/jobs/${job._id}`)}
       >
         <CardContent>
+          {isDeadlinePassed(job.applicationDeadline) && (
+            <Box sx={{ mb: 2 }}>
+              <Chip
+                label="Application Closed"
+                color="error"
+                size="small"
+                variant="filled"
+                sx={{ fontWeight: 'bold' }}
+              />
+            </Box>
+          )}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
             <Typography variant="h6" component="h3" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
               {job.title}
@@ -223,9 +250,10 @@ const JobList = () => {
               Posted {formatDate(job.createdAt)}
             </Typography>
             <Chip
-              label={`${getDaysUntilDeadline(job.applicationDeadline)} days left`}
+              label={getDeadlineText(job.applicationDeadline)}
               size="small"
-              color={getDaysUntilDeadline(job.applicationDeadline) <= 7 ? 'error' : 'default'}
+              color={isDeadlinePassed(job.applicationDeadline) ? 'error' : (getDaysUntilDeadline(job.applicationDeadline) <= 7 ? 'warning' : 'default')}
+              variant={isDeadlinePassed(job.applicationDeadline) ? 'filled' : 'outlined'}
             />
           </Box>
         </CardContent>

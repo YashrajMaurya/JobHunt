@@ -143,6 +143,17 @@ const JobDetail = () => {
     return getDaysUntilDeadline(deadline) <= 0;
   };
 
+  const getDeadlineText = (deadline) => {
+    const daysLeft = getDaysUntilDeadline(deadline);
+    if (daysLeft <= 0) {
+      return 'Application Closed';
+    } else if (daysLeft === 1) {
+      return '1 day left';
+    } else {
+      return `${daysLeft} days left`;
+    }
+  };
+
   if (loading) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -355,8 +366,15 @@ const JobDetail = () => {
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                   {job.totalApplications} applications received
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" gutterBottom>
                   {job.views} views
+                </Typography>
+                <Typography 
+                  variant="body2" 
+                  color={isDeadlinePassed(job.applicationDeadline) ? 'error.main' : 'text.secondary'}
+                  sx={{ fontWeight: isDeadlinePassed(job.applicationDeadline) ? 'bold' : 'normal' }}
+                >
+                  {getDeadlineText(job.applicationDeadline)}
                 </Typography>
               </Box>
 

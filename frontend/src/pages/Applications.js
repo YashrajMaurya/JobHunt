@@ -83,14 +83,21 @@ const Applications = () => {
       setLoading(true);
       setError(null);
 
+      console.log('📋 Fetching applications for user:', user?.role, user?.id);
+      console.log('🌐 API URL:', axios.defaults.baseURL);
+
       // If recruiter is viewing applications for a specific job, use the job-specific endpoint
       if (user?.role === 'recruiter' && jobId) {
+        console.log('👔 Fetching recruiter job-specific applications for job:', jobId);
         const response = await axios.get(`/api/recruiter/jobs/${jobId}/applications`);
+        console.log('✅ Recruiter applications response:', response.data);
+        
         if (response.data.success) {
           setApplications(response.data.applications || []);
           setPagination(prev => ({ ...prev, totalPages: 1, total: response.data.count || (response.data.applications || []).length }));
         }
       } else {
+        console.log('👨‍🎓 Fetching student applications with filters:', filters);
         const params = new URLSearchParams({
           page: pagination.currentPage,
           limit: 10,
@@ -102,7 +109,13 @@ const Applications = () => {
             params.delete(key);
           }
         });
-        const response = await axios.get(`/api/applications/search?${params}`);
+        
+        const endpoint = `/api/applications/search?${params}`;
+        console.log('🔗 Calling endpoint:', endpoint);
+        
+        const response = await axios.get(endpoint);
+        console.log('✅ Student applications response:', response.data);
+        
         if (response.data.success) {
           setApplications(response.data.applications);
           setPagination(prev => ({
@@ -113,7 +126,16 @@ const Applications = () => {
         }
       }
     } catch (error) {
-      console.error('Error fetching applications:', error);
+      console.error('❌ Error fetching applications:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          baseURL: error.config?.baseURL
+        }
+      });
       setError('Failed to fetch applications. Please try again.');
     } finally {
       setLoading(false);
