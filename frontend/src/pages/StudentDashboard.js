@@ -55,7 +55,7 @@ const StudentDashboard = () => {
     try {
       const [statsResponse, applicationsResponse] = await Promise.all([
         axios.get('/api/student/dashboard'),
-        axios.get('/api/student/applications?limit=5')
+        axios.get('/api/applications/search?limit=5&page=1')
       ]);
 
       if (statsResponse.data.success) {
