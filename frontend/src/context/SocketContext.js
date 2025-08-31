@@ -20,9 +20,19 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (user) {
       // Initialize socket connection
-      const newSocket = io(process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000', {
+      const socketUrl = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000';
+      console.log('🔌 Connecting to WebSocket:', socketUrl);
+      
+      const newSocket = io(socketUrl, {
         withCredentials: true,
-        transports: ['websocket', 'polling']
+        transports: ['websocket', 'polling'],
+        // Add production-specific options
+        forceNew: true,
+        timeout: 20000,
+        // Handle CORS issues in production
+        extraHeaders: {
+          'Access-Control-Allow-Origin': '*'
+        }
       });
 
       newSocket.on('connect', () => {
@@ -44,8 +54,26 @@ export const SocketProvider = ({ children }) => {
       });
 
       newSocket.on('connect_error', (error) => {
-        console.error('Socket connection error:', error);
+        console.error('🔌 Socket connection error:', {
+          message: error.message,
+          description: error.description,
+          context: error.context,
+          type: error.type
+        });
         setIsConnected(false);
+      });
+
+      newSocket.on('error', (error) => {
+        console.error('🔌 Socket error:', error);
+      });
+
+      newSocket.on('reconnect', (attemptNumber) => {
+        console.log('🔌 Socket reconnected after', attemptNumber, 'attempts');
+        setIsConnected(true);
+      });
+
+      newSocket.on('reconnect_error', (error) => {
+        console.error('🔌 Socket reconnection error:', error);
       });
 
       setSocket(newSocket);

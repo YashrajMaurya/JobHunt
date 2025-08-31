@@ -69,8 +69,54 @@ export const AuthProvider = ({ children }) => {
 
   // Configure axios defaults
   useEffect(() => {
-    axios.defaults.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    console.log('🌐 Setting axios baseURL to:', apiUrl);
+    console.log('🍪 withCredentials:', true);
+    console.log('🔧 Environment:', process.env.NODE_ENV);
+    
+    axios.defaults.baseURL = apiUrl;
     axios.defaults.withCredentials = true;
+    
+    // Add request interceptor to handle cookies in production
+    const requestInterceptor = axios.interceptors.request.use(
+      (config) => {
+        console.log('📤 Request config:', {
+          url: config.url,
+          method: config.method,
+          withCredentials: config.withCredentials
+        });
+        return config;
+      },
+      (error) => {
+        return Promise.reject(error);
+      }
+    );
+
+    // Add response interceptor to handle cookie issues
+    const responseInterceptor = axios.interceptors.response.use(
+      (response) => {
+        console.log('📥 Response received:', {
+          status: response.status,
+          url: response.config.url,
+          cookies: document.cookie ? 'Present' : 'None'
+        });
+        return response;
+      },
+      (error) => {
+        console.log('❌ Response error:', {
+          status: error.response?.status,
+          message: error.response?.data?.message,
+          url: error.config?.url
+        });
+        return Promise.reject(error);
+      }
+    );
+
+    // Cleanup interceptors
+    return () => {
+      axios.interceptors.request.eject(requestInterceptor);
+      axios.interceptors.response.eject(responseInterceptor);
+    };
   }, []);
 
   // Check if user is already authenticated on app load
