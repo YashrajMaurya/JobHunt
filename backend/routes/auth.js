@@ -185,14 +185,10 @@ router.post('/logout', protect, (req, res) => {
   const frontendUrl = process.env.FRONTEND_URL;
   
   const cookieOptions = {
-    expires: new Date(Date.now() + 10 * 1000), // 10 seconds
-    httpOnly: true,
-    secure: true,
-    sameSite: 'None',
-    // Set domain for production cookies
-    ...(isProduction && frontendUrl && {
-      domain: new URL(frontendUrl).hostname.replace(/^www\./, '')
-    })
+      httpOnly: true,     //prevent js to access cookie
+      secure: process.env.NODE_ENV === 'production',  //Use secure cookie in production
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',  //CSRF Protection
+      maxAge: 7 * 24 * 60 * 60 * 1000,  //Cookie Expiration time
   };
 
   console.log('🍪 Clearing cookie with options:', cookieOptions);
