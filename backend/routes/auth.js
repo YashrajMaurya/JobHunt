@@ -190,7 +190,7 @@ router.post('/logout', protect, (req, res) => {
   const cookieOptions = {
     httpOnly: true,     //prevent js to access cookie
     secure: process.env.NODE_ENV === 'production',  //Use secure cookie in production
-    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'strict',  //CSRF Protection
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',  //CSRF Protection
     maxAge: 7 * 24 * 69 * 60 * 1000,  //Cookie Expiration time
   };
 
