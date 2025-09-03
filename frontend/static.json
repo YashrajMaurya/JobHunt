@@ -1,8 +1,0 @@
-{
-  "routes": [
-    { "src": "/api/(.*)", "dest": "https://jobhunt-backend-prc6.onrender.com/api/$1" },
-    { "src": "/(.*)", "dest": "/index.html" }
-  ]
-}
-
-
