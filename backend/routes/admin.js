@@ -30,7 +30,7 @@ router.post('/login', async (req, res) => {
       httpOnly: true,     //prevent js to access cookie
       secure: process.env.NODE_ENV === 'production',  //Use secure cookie in production
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',  //CSRF Protection
-      maxAge: 7 * 24 * 69 * 60 * 1000,  //Cookie Expiration time
+      maxAge: 7 * 24 * 60 * 60 * 1000,  //Cookie Expiration time
     });
 
     return res.json({ success: true, admin: { email, role: 'admin' } });
