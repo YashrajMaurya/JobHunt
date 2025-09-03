@@ -18,16 +18,13 @@ const sendTokenResponse = (user, statusCode, res) => {
   // Determine cookie options based on environment
   const isProduction = process.env.NODE_ENV === 'production';
   const frontendUrl = process.env.FRONTEND_URL;
-
+  
   const options = {
-    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-    httpOnly: true,
-    secure: isProduction, // HTTPS only in production
-    sameSite: 'none', // enforce cross-site cookie for all envs
-    // Set domain for production cookies
-    ...(isProduction && frontendUrl && {
-      domain: new URL(frontendUrl).hostname.replace(/^www\./, '')
-    })
+      httpOnly: true,     //prevent js to access cookie
+      secure: process.env.NODE_ENV === 'production',  //Use secure cookie in production
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',  //CSRF Protection
+      maxAge: 7 * 24 * 60 * 60 * 1000,  //Cookie Expiration time
+    
   };
 
   console.log('🍪 Setting cookie with options:', {
@@ -186,12 +183,16 @@ router.post('/logout', protect, (req, res) => {
   // Determine cookie options based on environment (same as login)
   const isProduction = process.env.NODE_ENV === 'production';
   const frontendUrl = process.env.FRONTEND_URL;
-
+  
   const cookieOptions = {
-    httpOnly: true,     //prevent js to access cookie
-    secure: process.env.NODE_ENV === 'production',  //Use secure cookie in production
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',  //CSRF Protection
-    maxAge: 7 * 24 * 60 * 60 * 1000,  //Cookie Expiration time
+    expires: new Date(Date.now() + 10 * 1000), // 10 seconds
+    httpOnly: true,
+    secure: true,
+    sameSite: 'None',
+    // Set domain for production cookies
+    ...(isProduction && frontendUrl && {
+      domain: new URL(frontendUrl).hostname.replace(/^www\./, '')
+    })
   };
 
   console.log('🍪 Clearing cookie with options:', cookieOptions);
