@@ -190,8 +190,8 @@ router.post('/logout', protect, (req, res) => {
   const cookieOptions = {
     expires: new Date(Date.now() + 10 * 1000), // 10 seconds
     httpOnly: true,
-    secure: isProduction,
-    sameSite: 'none',
+    secure: true,
+    sameSite: 'None',
     // Set domain for production cookies
     ...(isProduction && frontendUrl && {
       domain: new URL(frontendUrl).hostname.replace(/^www\./, '')
