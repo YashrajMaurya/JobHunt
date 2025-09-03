@@ -27,10 +27,10 @@ router.post('/login', async (req, res) => {
     const token = signAdminToken({ id: 'admin', email, role: 'admin' });
 
     res.cookie('admin_token', token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'None',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true,     //prevent js to access cookie
+      secure: process.env.NODE_ENV === 'production',  //Use secure cookie in production
+      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'strict',  //CSRF Protection
+      maxAge: 7 * 24 * 69 * 60 * 1000,  //Cookie Expiration time
     });
 
     return res.json({ success: true, admin: { email, role: 'admin' } });
