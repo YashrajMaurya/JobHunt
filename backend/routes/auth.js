@@ -23,7 +23,7 @@ const sendTokenResponse = (user, statusCode, res) => {
     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
     httpOnly: true,
     secure: isProduction, // HTTPS only in production
-    sameSite: isProduction ? 'none' : 'lax', // 'none' for cross-site in production
+    sameSite: 'none', // enforce cross-site cookie for all envs
     // Set domain for production cookies
     ...(isProduction && frontendUrl && {
       domain: new URL(frontendUrl).hostname.replace(/^www\./, '')
@@ -191,7 +191,7 @@ router.post('/logout', protect, (req, res) => {
     expires: new Date(Date.now() + 10 * 1000), // 10 seconds
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? 'none' : 'lax',
+    sameSite: 'none',
     // Set domain for production cookies
     ...(isProduction && frontendUrl && {
       domain: new URL(frontendUrl).hostname.replace(/^www\./, '')

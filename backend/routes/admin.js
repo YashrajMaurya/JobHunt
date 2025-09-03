@@ -29,7 +29,7 @@ router.post('/login', async (req, res) => {
     res.cookie('admin_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -42,7 +42,12 @@ router.post('/login', async (req, res) => {
 
 // Admin Logout
 router.post('/logout', adminProtect, (req, res) => {
-  res.clearCookie('admin_token');
+  res.clearCookie('admin_token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'none',
+    path: '/',
+  });
   return res.json({ success: true });
 });
 
