@@ -8,7 +8,6 @@ import {
   CardContent,
   Button,
   Chip,
-  Avatar,
   Divider,
   TextField,
   Dialog,
@@ -16,10 +15,7 @@ import {
   DialogContent,
   DialogActions,
   Alert,
-  useTheme,
-  useMediaQuery,
   Skeleton,
-  Paper,
   IconButton
 } from '@mui/material';
 import {
@@ -29,7 +25,6 @@ import {
   Schedule as ScheduleIcon,
   AttachMoney as MoneyIcon,
   School as SchoolIcon,
-  Description as DescriptionIcon,
   Send as SendIcon,
   Close as CloseIcon
 } from '@mui/icons-material';
@@ -37,12 +32,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 
-const JobDetail = () => {
+  const JobDetail = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -54,7 +47,7 @@ const JobDetail = () => {
 
   useEffect(() => {
     fetchJobDetails();
-  }, [id]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchJobDetails = async () => {
     try {
@@ -80,7 +73,8 @@ const JobDetail = () => {
       return;
     }
 
-    if (user.role !== 'student') {
+    // Explicit check - only students can apply, never recruiters
+    if (user.role !== 'student' || user.role === 'recruiter') {
       setApplicationError('Only students can apply for jobs.');
       return;
     }
@@ -351,97 +345,85 @@ const JobDetail = () => {
           </Grid>
         </Grid>
 
-        {/* Sidebar */}
-        <Grid item xs={12} md={4}>
-          <Card sx={{ position: 'sticky', top: 20 }}>
-            <CardContent>
-              <Typography variant="h6" component="h3" sx={{ fontWeight: 'bold', mb: 3 }}>
-                Job Summary
-              </Typography>
+        {/* Sidebar - Only show to students and non-authenticated users */}
+        {user?.role !== 'recruiter' && (
+          <Grid item xs={12} md={4}>
+            <Card sx={{ position: 'sticky', top: 20 }}>
+              <CardContent>
+                <Typography variant="h6" component="h3" sx={{ fontWeight: 'bold', mb: 3 }}>
+                  Job Summary
+                </Typography>
 
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Posted on {formatDate(job.createdAt)}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  {job.totalApplications} applications received
-                </Typography>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  {job.views} views
-                </Typography>
-                <Typography 
-                  variant="body2" 
-                  color={isDeadlinePassed(job.applicationDeadline) ? 'error.main' : 'text.secondary'}
-                  sx={{ fontWeight: isDeadlinePassed(job.applicationDeadline) ? 'bold' : 'normal' }}
-                >
-                  {getDeadlineText(job.applicationDeadline)}
-                </Typography>
-              </Box>
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    Posted on {formatDate(job.createdAt)}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    {job.totalApplications} applications received
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    {job.views} views
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    color={isDeadlinePassed(job.applicationDeadline) ? 'error.main' : 'text.secondary'}
+                    sx={{ fontWeight: isDeadlinePassed(job.applicationDeadline) ? 'bold' : 'normal' }}
+                  >
+                    {getDeadlineText(job.applicationDeadline)}
+                  </Typography>
+                </Box>
 
-              <Divider sx={{ my: 2 }} />
+                <Divider sx={{ my: 2 }} />
 
-              {/* Apply Button */}
-              {user?.role === 'student' ? (
-                <Box>
-                  {job.hasApplied ? (
+                {/* Apply Button - Only show to students, never to recruiters */}
+                {user && user.role === 'student' ? (
+                  <Box>
+                    {job.hasApplied ? (
+                      <Alert severity="info" sx={{ mb: 2 }}>
+                        You have already applied for this job
+                      </Alert>
+                    ) : (
+                      <Button
+                        variant="contained"
+                        fullWidth
+                        size="large"
+                        onClick={handleApply}
+                        disabled={isDeadlinePassed(job.applicationDeadline)}
+                        startIcon={<SendIcon />}
+                        sx={{ mb: 2 }}
+                      >
+                        {isDeadlinePassed(job.applicationDeadline) ? 'Deadline Passed' : 'Apply Now'}
+                      </Button>
+                    )}
+                    
+                    <Button
+                      variant="outlined"
+                      fullWidth
+                      onClick={() => navigate('/jobs')}
+                      startIcon={<WorkIcon />}
+                    >
+                      Browse More Jobs
+                    </Button>
+                  </Box>
+                ) : (
+                  <Box>
                     <Alert severity="info" sx={{ mb: 2 }}>
-                      You have already applied for this job
+                      Please log in as a student to apply for this job
                     </Alert>
-                  ) : (
                     <Button
                       variant="contained"
                       fullWidth
-                      size="large"
-                      onClick={handleApply}
-                      disabled={isDeadlinePassed(job.applicationDeadline)}
-                      startIcon={<SendIcon />}
-                      sx={{ mb: 2 }}
+                      onClick={() => navigate('/login')}
+                      startIcon={<WorkIcon />}
                     >
-                      {isDeadlinePassed(job.applicationDeadline) ? 'Deadline Passed' : 'Apply Now'}
+                      Login to Apply
                     </Button>
-                  )}
-                  
-                  <Button
-                    variant="outlined"
-                    fullWidth
-                    onClick={() => navigate('/jobs')}
-                    startIcon={<WorkIcon />}
-                  >
-                    Browse More Jobs
-                  </Button>
-                </Box>
-              ) : user?.role === 'recruiter' ? (
-                <Box>
-                  <Alert severity="info" sx={{ mb: 2 }}>
-                    This is a job posting from another company
-                  </Alert>
-                  <Button
-                    variant="outlined"
-                    fullWidth
-                    onClick={() => navigate('/recruiter/create-job')}
-                    startIcon={<WorkIcon />}
-                  >
-                    Post Your Own Job
-                  </Button>
-                </Box>
-              ) : (
-                <Box>
-                  <Alert severity="info" sx={{ mb: 2 }}>
-                    Please log in as a student to apply for this job
-                  </Alert>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    onClick={() => navigate('/login')}
-                    startIcon={<WorkIcon />}
-                  >
-                    Login to Apply
-                  </Button>
-                </Box>
-              )}
-            </CardContent>
-          </Card>
-        </Grid>
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
+        )}
       </Grid>
 
       {/* Application Dialog */}

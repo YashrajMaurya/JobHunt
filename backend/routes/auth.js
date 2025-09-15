@@ -27,12 +27,6 @@ const sendTokenResponse = (user, statusCode, res) => {
     
   };
 
-  console.log('🍪 Setting cookie with options:', {
-    secure: options.secure,
-    sameSite: options.sameSite,
-    domain: options.domain,
-    isProduction
-  });
 
   res.status(statusCode)
     .cookie('token', token, options)
